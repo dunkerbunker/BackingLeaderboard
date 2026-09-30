@@ -1,0 +1,61 @@
+name: backing
+
+x-runtime-environment: &runtime-environment
+  NODE_ENV: production
+  APP_ENV: ${APP_ENV:-staging}
+  PORT: "3010"
+  HOSTNAME: 0.0.0.0
+  # An explicitly empty production APP_URL stays empty until the domain is known.
+  APP_URL: ${DOCKER_APP_URL-${APP_URL-http://localhost:3010}}
+  UPLOAD_DIR: /app/data/uploads
+
+services:
+  app:
+    image: backing:${APP_ENV:-staging}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+      args:
+        NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${NEXT_PUBLIC_TURNSTILE_SITE_KEY:-}
+    env_file:
+      - .env.${APP_ENV:-staging}
+    environment: *runtime-environment
+    ports:
+      - "3010:3010"
+    volumes:
+      - uploads:/app/data/uploads
+    init: true
+    restart: unless-stopped
+    stop_grace_period: 30s
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  # Optional CLI container, using the same live database and environment as app.
+  tools:
+    profiles: [tools]
+    image: backing-tools:${APP_ENV:-staging}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: tooling
+    env_file:
+      - .env.${APP_ENV:-staging}
+    environment: *runtime-environment
+    init: true
+    restart: "no"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+volumes:
+  uploads:
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: ${DOCKER_SUBNET:-10.241.10.0/24}

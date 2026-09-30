@@ -1,24 +1,60 @@
 {
-  "name": "backing-app",
+  "name": "backing",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node scripts/run.mjs staging dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint .",
+    "dev:staging": "node scripts/run.mjs staging dev",
+    "build:staging": "node scripts/run.mjs staging build",
+    "build:production": "node scripts/run.mjs production build",
+    "start:staging": "node scripts/run.mjs staging start",
+    "start:production": "node scripts/run.mjs production start",
+    "db:migrate:staging": "node --env-file=.env.staging --import tsx scripts/db.ts migrate",
+    "db:migrate:production": "node --env-file=.env.production --import tsx scripts/db.ts migrate",
+    "db:seed:staging": "node --env-file=.env.staging --import tsx scripts/db.ts seed",
+    "db:check:staging": "node --env-file=.env.staging --import tsx scripts/db.ts check",
+    "db:check:production": "node --env-file=.env.production --import tsx scripts/db.ts check",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "test:e2e": "playwright test",
+    "typecheck": "tsc --noEmit",
+    "ops:staging": "node --env-file=.env.staging --import tsx scripts/maintenance.ts",
+    "ops:production": "node --env-file=.env.production --import tsx scripts/maintenance.ts",
+    "dev:production": "node scripts/run.mjs production dev",
+    "test:integration": "node --env-file=.env.staging --import tsx --test tests/*.integration.ts",
+    "format": "prettier --write src scripts tests *.ts *.mjs *.json",
+    "assets:staging": "node --env-file=.env.staging --import tsx scripts/upload-demo-assets.ts",
+    "assets:brand": "node scripts/brand-assets.mjs"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1143.0",
+    "dodopayments": "^2.52.0",
+    "jose": "^6.2.12",
+    "lucide-react": "^1.49.0",
     "next": "16.3.7",
+    "pg": "^8.23.0",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "redis": "^6.2.1",
+    "sharp": "^0.35.5",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.63.0",
     "@types/node": "^20",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.7",
+    "prettier": "^3.9.9",
+    "tsx": "^4.23.15",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }
